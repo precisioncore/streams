@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Webcam Stream Viewer</title>
+  <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+    }
+    .stream-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+    }
+    .stream-window {
+      width: 100%;
+      max-width: 400px;
+      height: 225px; /* 16:9 aspect ratio */
+      margin-bottom: 20px;
+      background-color: #000;
+      border: 2px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .video-js {
+      width: 100%;
+      height: 100%;
+    }
+    .stream-label {
+      margin-top: 5px;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="stream-container" id="stream-container">
+    <!-- Streams will be dynamically added here -->
+  </div>
+
+  <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+  <script>
+    // Placeholder stream URLs (replace with actual webcam HLS or MP4 streams)
+    const streamUrls = [
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', // Test stream
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', // Duplicate for demo
+      'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+      // Add more stream URLs here (replace with real webcam streams)
+    ];
+
+    const container = document.getElementById('stream-container');
+
+    // Function to create a stream window
+    function createStreamWindow(url, index) {
+      const streamDiv = document.createElement('div');
+      streamDiv.className = 'stream-window';
+      streamDiv.innerHTML = `
+        <video
+          id="video-player-${index}"
+          class="video-js vjs-default-skin"
+          controls
+          autoplay
+          muted
+          preload="auto"
+        >
+          <source src="${url}" type="application/x-mpegURL">
+          Your browser does not support the video tag.
+        </video>
+        <div class="stream-label">Webcam ${index + 1}</div>
+      `;
+      container.appendChild(streamDiv);
+
+      // Initialize Video.js player
+      videojs(`video-player-${index}`, {
+        fluid: false,
+        responsive: true,
+        liveui: true,
+      });
+    }
+
+    // Load streams
+    streamUrls.forEach((url, index) => {
+      createStreamWindow(url, index);
+    });
+
+    // Basic lazy loading (optional, enhance with IntersectionObserver for production)
+    document.addEventListener('scroll', () => {
+      const videos = document.querySelectorAll('video');
+      videos.forEach(video => {
+        const rect = video.getBoundingClientRect();
+        if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+          if (video.paused) video.play();
+        } else {
+          if (!video.paused) video.pause();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
