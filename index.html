@@ -58,6 +58,43 @@
 
     ];
 
+
+    
+function createMjpegWindow(mjpegUrl, index) {
+  const streamDiv = document.createElement('div');
+  streamDiv.className = 'stream-window';
+  streamDiv.innerHTML = `
+    <img src="${mjpegUrl}" style="width:100%; height:100%; object-fit:cover;" />
+    <div class="stream-label">Camera ${index + 1}</div>
+  `;
+  container.appendChild(streamDiv);
+}
+
+
+
+    <!-- Include HLS.js in your <head> -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script>
+function createHlsWindow(streamUrl) {
+  const video = document.createElement('video');
+  video.autoplay = true;
+  video.muted = true;
+  video.controls = true;
+  
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(streamUrl); // e.g., 'http://example.com/live/stream.m3u8'
+    hls.attachMedia(video);
+  }
+  container.appendChild(video);
+}
+</script>
+
+
+  
+
+    
     const container = document.getElementById('stream-container');
 
     // Function to create a stream window
