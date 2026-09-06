@@ -41,7 +41,7 @@
       align-items: center;
     }
     .stream-card {
-      width: 100%; /* Spans full width of screen */
+      width: 100%;
       margin-bottom: 30px;
       display: flex;
       flex-direction: column;
@@ -49,7 +49,7 @@
     }
     .stream-window {
       width: 100%;
-      height: 500px; /* Doubled height */
+      height: 500px;
       background-color: #000;
       border: 2px solid #333;
       border-radius: 8px;
@@ -100,7 +100,10 @@
       { type: 'iframe', url: 'https://www.youtube.com/embed/V7sUbjD_e3I?autoplay=1&mute=1', openUrl: 'https://www.youtube.com/watch?v=V7sUbjD_e3I', label: 'The Edge Hotel' },
       { type: 'iframe', url: 'https://www.youtube.com/embed/8uHdbMOqSwY?autoplay=1&mute=1', openUrl: 'https://www.youtube.com/watch?v=8uHdbMOqSwY', label: 'NY 1963' },
 
-      // Added Streams
+      // Direct Web View (Placed near top)
+      { type: 'iframe', url: 'http://50.214.237.218/camera/index.html#/video', openUrl: 'http://50.214.237.218/camera/index.html#/video', label: 'Camera Direct View (50.214.237.218)' },
+
+      // Additional Marina Streams
       { type: 'iframe', url: 'http://cam.masonsislandmarina.net/viewer/live/en/live.html', openUrl: 'http://cam.masonsislandmarina.net/viewer/live/en/live.html', label: 'Masons Island Marina Cam' },
       { type: 'iframe', url: 'https://www.norwalkyachtclub.com/webcams', openUrl: 'https://www.norwalkyachtclub.com/webcams', label: 'Norwalk Yacht Club Webcams' },
       { type: 'iframe', url: 'https://sagamoreyc.com/about/webcam-and-weather/', openUrl: 'https://sagamoreyc.com/about/webcam-and-weather/', label: 'Sagamore YC Webcam & Weather' },
