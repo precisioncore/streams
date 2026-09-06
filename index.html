@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Webcam Stream Viewer</title>
-  <!-- Load HLS.js for .m3u8 live streams -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     body {
@@ -16,13 +15,34 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 10px;
+      padding: 20px;
+    }
+    .open-all-btn {
+      margin-bottom: 20px;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .open-all-btn:hover {
+      background-color: #0056b3;
+    }
+    .stream-card {
+      width: 100%;
+      max-width: 450px;
+      margin-bottom: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
     }
     .stream-window {
       width: 100%;
-      max-width: 400px;
-      height: 225px; /* 16:9 aspect ratio */
-      margin-bottom: 20px;
+      height: 250px;
       background-color: #000;
       border: 2px solid #333;
       border-radius: 8px;
@@ -39,32 +59,59 @@
       position: absolute;
       bottom: 5px;
       left: 5px;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.7);
       color: #fff;
-      padding: 2px 6px;
-      font-size: 14px;
+      padding: 3px 8px;
+      font-size: 13px;
       border-radius: 4px;
+    }
+    .stream-link {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #007bff;
+      text-decoration: none;
+      text-align: right;
+    }
+    .stream-link:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <div class="stream-container" id="stream-container">
-    <!-- Streams will be dynamically added here -->
+  <div class="stream-container">
+    <button class="open-all-btn" id="open-all-btn">🚀 Open All Streams in New Tabs</button>
+    <div id="stream-list"></div>
   </div>
 
   <script>
-    const container = document.getElementById('stream-container');
+    const streamList = document.getElementById('stream-list');
+    const openAllBtn = document.getElementById('open-all-btn');
 
-    // List streams with type: 'iframe', 'mjpeg', or 'hls'
     const streams = [
-      { type: 'iframe', url: 'https://www.youtube.com/embed/K1PkxWM6QB4?autoplay=1&mute=1', label: 'Beachhouse Webcam' },
-      { type: 'iframe', url: 'https://www.youtube.com/embed/V7sUbjD_e3I?autoplay=1&mute=1', label: 'The Edge Hotel' },
-      { type: 'iframe', url: 'https://www.youtube.com/embed/8uHdbMOqSwY?autoplay=1&mute=1', label: 'NY 1963' },
-      { type: 'iframe', url: 'http://50.214.237.218/camera/index.html#/video', label: 'Direct Web View' }
+      // Original YouTube Streams
+      { type: 'iframe', url: 'https://www.youtube.com/embed/K1PkxWM6QB4?autoplay=1&mute=1', openUrl: 'https://www.youtube.com/watch?v=K1PkxWM6QB4', label: 'Beachhouse Webcam' },
+      { type: 'iframe', url: 'https://www.youtube.com/embed/V7sUbjD_e3I?autoplay=1&mute=1', openUrl: 'https://www.youtube.com/watch?v=V7sUbjD_e3I', label: 'The Edge Hotel' },
+      { type: 'iframe', url: 'https://www.youtube.com/embed/8uHdbMOqSwY?autoplay=1&mute=1', openUrl: 'https://www.youtube.com/watch?v=8uHdbMOqSwY', label: 'NY 1963' },
+
+      // Added Streams
+      { type: 'iframe', url: 'http://cam.masonsislandmarina.net/viewer/live/en/live.html', openUrl: 'http://cam.masonsislandmarina.net/viewer/live/en/live.html', label: 'Masons Island Marina Cam' },
+      { type: 'iframe', url: 'https://www.norwalkyachtclub.com/webcams', openUrl: 'https://www.norwalkyachtclub.com/webcams', label: 'Norwalk Yacht Club Webcams' },
+      { type: 'iframe', url: 'https://sagamoreyc.com/about/webcam-and-weather/', openUrl: 'https://sagamoreyc.com/about/webcam-and-weather/', label: 'Sagamore YC Webcam & Weather' },
+      { type: 'iframe', url: 'https://cityislandyc.org/live-weather', openUrl: 'https://cityislandyc.org/live-weather', label: 'City Island YC Live Weather' },
+      { type: 'iframe', url: 'https://rtsp.me/embed/ThNDY2Qr/', openUrl: 'https://rtsp.me/embed/ThNDY2Qr/', label: 'RTSP.me Stream' },
+      { type: 'iframe', url: 'http://entt.org/WebcamPage.html', openUrl: 'http://entt.org/WebcamPage.html', label: 'ENTT Webcam' },
+      { type: 'iframe', url: 'https://www.brickcove.com/marina-webcam', openUrl: 'https://www.brickcove.com/marina-webcam', label: 'Brick Cove Marina Webcam' },
+      { type: 'iframe', url: 'https://www.watchhillmarinas.com/marina-webcam', openUrl: 'https://www.watchhillmarinas.com/marina-webcam', label: 'Watch Hill Marina Webcam' },
+      { type: 'iframe', url: 'https://www.herringtonharbour.com/north/north-marina-webcams/', openUrl: 'https://www.herringtonharbour.com/north/north-marina-webcams/', label: 'Herrington Harbour North Webcams' },
+      { type: 'iframe', url: 'https://www.atlanticmarinasmd.com/marina-webcam', openUrl: 'https://www.atlanticmarinasmd.com/marina-webcam', label: 'Atlantic Marinas MD Webcam' },
+      { type: 'iframe', url: 'https://visitsheboygan.com/web-cam/marina-webcam/', openUrl: 'https://visitsheboygan.com/web-cam/marina-webcam/', label: 'Visit Sheboygan Marina Webcam' }
     ];
 
     function renderStreams() {
-      streams.forEach((stream, index) => {
+      streams.forEach((stream) => {
+        const card = document.createElement('div');
+        card.className = 'stream-card';
+
         const streamDiv = document.createElement('div');
         streamDiv.className = 'stream-window';
 
@@ -100,9 +147,24 @@
           streamDiv.appendChild(labelDiv);
         }
 
-        container.appendChild(streamDiv);
+        const link = document.createElement('a');
+        link.className = 'stream-link';
+        link.href = stream.openUrl || stream.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = `Open "${stream.label}" in new tab ↗`;
+
+        card.appendChild(streamDiv);
+        card.appendChild(link);
+        streamList.appendChild(card);
       });
     }
+
+    openAllBtn.addEventListener('click', () => {
+      streams.forEach((stream) => {
+        window.open(stream.openUrl || stream.url, '_blank');
+      });
+    });
 
     renderStreams();
   </script>
