@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube Webcam Stream Viewer</title>
+  <title>Webcam Stream Viewer</title>
+  <!-- Load HLS.js for .m3u8 live streams -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     body {
       margin: 0;
@@ -25,16 +27,23 @@
       border: 2px solid #333;
       border-radius: 8px;
       overflow: hidden;
+      position: relative;
     }
-    iframe {
+    iframe, video, img {
       width: 100%;
       height: 100%;
       border: none;
+      object-fit: cover;
     }
     .stream-label {
-      margin-top: 5px;
-      font-size: 16px;
-      color: #333;
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 2px 6px;
+      font-size: 14px;
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -44,74 +53,58 @@
   </div>
 
   <script>
-    // YouTube embed URLs (replace with real YouTube live stream URLs)
-    const streamUrls = [
-      'https://www.youtube.com/embed/K1PkxWM6QB4?autoplay=1&mute=1', // Beachhouse Webcam Miramar Beach, FL
-      'https://www.youtube.com/embed/V7sUbjD_e3I?autoplay=1&mute=1', // The Edge Hotel Clearwater
-      'https://www.youtube.com/embed/8uHdbMOqSwY?autoplay=1&mute=1', // NY 1963
-
-      'http://50.214.237.218/camera/index.html#/video' // Direct web view
-
-
-
-
-
-    ];
-
-
-    
-function createMjpegWindow(mjpegUrl, index) {
-  const streamDiv = document.createElement('div');
-  streamDiv.className = 'stream-window';
-  streamDiv.innerHTML = `
-    <img src="${mjpegUrl}" style="width:100%; height:100%; object-fit:cover;" />
-    <div class="stream-label">Camera ${index + 1}</div>
-  `;
-  container.appendChild(streamDiv);
-}
-
-
-
-    <!-- Include HLS.js in your <head> -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
-<script>
-function createHlsWindow(streamUrl) {
-  const video = document.createElement('video');
-  video.autoplay = true;
-  video.muted = true;
-  video.controls = true;
-  
-  if (Hls.isSupported()) {
-    const hls = new Hls();
-    hls.loadSource(streamUrl); // e.g., 'http://example.com/live/stream.m3u8'
-    hls.attachMedia(video);
-  }
-  container.appendChild(video);
-}
-</script>
-
-
-  
-
-    
     const container = document.getElementById('stream-container');
 
-    // Function to create a stream window
-    function createStreamWindow(url, index) {
-      const streamDiv = document.createElement('div');
-      streamDiv.className = 'stream-window';
-      streamDiv.innerHTML = `
-        <iframe src="${url}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        <div class="stream-label">Webcam ${index + 1}</div>
-      `;
-      container.appendChild(streamDiv);
+    // List streams with type: 'iframe', 'mjpeg', or 'hls'
+    const streams = [
+      { type: 'iframe', url: 'https://www.youtube.com/embed/K1PkxWM6QB4?autoplay=1&mute=1', label: 'Beachhouse Webcam' },
+      { type: 'iframe', url: 'https://www.youtube.com/embed/V7sUbjD_e3I?autoplay=1&mute=1', label: 'The Edge Hotel' },
+      { type: 'iframe', url: 'https://www.youtube.com/embed/8uHdbMOqSwY?autoplay=1&mute=1', label: 'NY 1963' },
+      { type: 'iframe', url: 'http://50.214.237.218/camera/index.html#/video', label: 'Direct Web View' }
+    ];
+
+    function renderStreams() {
+      streams.forEach((stream, index) => {
+        const streamDiv = document.createElement('div');
+        streamDiv.className = 'stream-window';
+
+        if (stream.type === 'iframe') {
+          streamDiv.innerHTML = `
+            <iframe src="${stream.url}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <div class="stream-label">${stream.label}</div>
+          `;
+        } else if (stream.type === 'mjpeg') {
+          streamDiv.innerHTML = `
+            <img src="${stream.url}" alt="${stream.label}">
+            <div class="stream-label">${stream.label}</div>
+          `;
+        } else if (stream.type === 'hls') {
+          const video = document.createElement('video');
+          video.autoplay = true;
+          video.muted = true;
+          video.controls = true;
+
+          if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(stream.url);
+            hls.attachMedia(video);
+          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = stream.url;
+          }
+
+          const labelDiv = document.createElement('div');
+          labelDiv.className = 'stream-label';
+          labelDiv.textContent = stream.label;
+
+          streamDiv.appendChild(video);
+          streamDiv.appendChild(labelDiv);
+        }
+
+        container.appendChild(streamDiv);
+      });
     }
 
-    // Load streams
-    streamUrls.forEach((url, index) => {
-      createStreamWindow(url, index);
-    });
+    renderStreams();
   </script>
 </body>
 </html>
